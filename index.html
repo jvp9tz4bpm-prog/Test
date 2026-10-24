@@ -82,9 +82,19 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const round=(n,d=1)=>Number(Number(n||0).toFixed(d));
 const fmtDate=(s,opts={day:"numeric",month:"short",year:"numeric"})=>s?parseDate(s).toLocaleDateString(undefined,opts):"";
 const daysBetween=(a,b)=>Math.round((parseDate(b)-parseDate(a))/86400000);
+
 const defaultsExercises=[
-["Barbell bench press","Chest"],["Incline dumbbell press","Chest"],["Cable fly","Chest"],["Lat pulldown","Back"],["Seated cable row","Back"],["Barbell row","Back"],["Pull-up","Back"],["Overhead press","Shoulders"],["Lateral raise","Shoulders"],["Face pull","Shoulders"],["Barbell curl","Biceps"],["Dumbbell curl","Biceps"],["Triceps pushdown","Triceps"],["Overhead triceps extension","Triceps"],["Barbell squat","Quadriceps"],["Leg press","Quadriceps"],["Leg extension","Quadriceps"],["Romanian deadlift","Hamstrings"],["Leg curl","Hamstrings"],["Hip thrust","Glutes"],["Standing calf raise","Calves"],["Plank","Core"],["Dead bug","Core"],["Deadlift","Full body"]
-].map(([name,muscle])=>({id:uid(),name,muscle,increment:2.5,active:true}));
+["Chest press","Chest"],
+["Leg press","Quadriceps"],
+["Lat pulldown","Back"],
+["Rows","Back"],
+["Shoulder press","Shoulders"],
+["Chest fly","Chest"],
+["Shoulder fly","Shoulders"],
+["Triceps pulldown","Triceps"],
+["Biceps curls","Biceps"]
+].map(([name,muscle])=>({id:uid(),name,muscle,increment:2.5,active:true}))
+;
 
 const templates=[
   {
