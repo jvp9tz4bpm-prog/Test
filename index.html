@@ -85,12 +85,36 @@ const daysBetween=(a,b)=>Math.round((parseDate(b)-parseDate(a))/86400000);
 const defaultsExercises=[
 ["Barbell bench press","Chest"],["Incline dumbbell press","Chest"],["Cable fly","Chest"],["Lat pulldown","Back"],["Seated cable row","Back"],["Barbell row","Back"],["Pull-up","Back"],["Overhead press","Shoulders"],["Lateral raise","Shoulders"],["Face pull","Shoulders"],["Barbell curl","Biceps"],["Dumbbell curl","Biceps"],["Triceps pushdown","Triceps"],["Overhead triceps extension","Triceps"],["Barbell squat","Quadriceps"],["Leg press","Quadriceps"],["Leg extension","Quadriceps"],["Romanian deadlift","Hamstrings"],["Leg curl","Hamstrings"],["Hip thrust","Glutes"],["Standing calf raise","Calves"],["Plank","Core"],["Dead bug","Core"],["Deadlift","Full body"]
 ].map(([name,muscle])=>({id:uid(),name,muscle,increment:2.5,active:true}));
+
 const templates=[
-{id:"full-a",name:"Full Body A",items:[["Barbell squat",3,8],["Barbell bench press",3,8],["Lat pulldown",3,10],["Romanian deadlift",3,8],["Lateral raise",3,12]]},
-{id:"full-b",name:"Full Body B",items:[["Leg press",3,10],["Incline dumbbell press",3,10],["Seated cable row",3,10],["Hip thrust",3,10],["Triceps pushdown",3,12]]},
-{id:"upper",name:"Upper Body",items:[["Barbell bench press",3,8],["Lat pulldown",3,10],["Overhead press",3,8],["Seated cable row",3,10],["Barbell curl",3,10],["Triceps pushdown",3,12]]},
-{id:"lower",name:"Lower Body",items:[["Barbell squat",3,8],["Romanian deadlift",3,8],["Leg press",3,10],["Leg curl",3,10],["Standing calf raise",3,12]]}
+  {
+    id:"full-core",
+    name:"Full Body (Core Exercises)",
+    items:[
+      ["Chest press",3,10],
+      ["Leg press",3,10],
+      ["Lat pulldown",3,10],
+      ["Rows",3,10],
+      ["Shoulder press",3,10]
+    ]
+  },
+  {
+    id:"full-all",
+    name:"Full Body (All Exercises)",
+    items:[
+      ["Chest press",3,10],
+      ["Leg press",3,10],
+      ["Lat pulldown",3,10],
+      ["Rows",3,10],
+      ["Shoulder press",3,10],
+      ["Chest fly",3,12],
+      ["Shoulder fly",3,12],
+      ["Triceps pulldown",3,12],
+      ["Biceps curls",3,12]
+    ]
+  }
 ];
+;
 const blankState=()=>({version:4,exercises:structuredClone(defaultsExercises),templates:structuredClone(templates),workouts:[],goals:[],weeklyTarget:2,bodyWeight:[]});
 let state;
 try{const saved=JSON.parse(localStorage.getItem(KEY)||"null");state=saved&&saved.version===4?saved:blankState();}catch{state=blankState()}
