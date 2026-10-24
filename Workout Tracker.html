@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101714">
+<title>RepLog — Fitness Tracker</title>
+<style>
+  :root {
+    --bg:#f3f5f2; --panel:#ffffff; --ink:#18211c; --muted:#69756e;
+    --line:#e1e7e1; --green:#176b4d; --green2:#dff3e8; --lime:#c8f169;
+    --red:#a33c36; --redbg:#fff0ed; --shadow:0 8px 28px rgba(20,40,28,.06);
+    --radius:20px;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+  button,input,select,textarea { font:inherit; }
+  button { cursor:pointer; }
+  .app { max-width:1120px; margin:0 auto; padding:20px 18px 100px; }
+  header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:24px; }
+  .brand { display:flex; align-items:center; gap:11px; font-weight:850; font-size:21px; letter-spacing:-.7px; }
+  .brand-mark { width:38px;height:38px;border-radius:13px;background:var(--green);color:white;display:grid;place-items:center;font-size:20px; }
+  .header-right { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:13px; }
+  .avatar { display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--lime);font-weight:800;color:#23341f; }
+  .eyebrow { color:var(--green); text-transform:uppercase; font-weight:800; letter-spacing:1.4px; font-size:11px; }
+  h1 { font-size:clamp(28px,5vw,40px); line-height:1.1; letter-spacing:-1.5px; margin:7px 0 8px; }
+  h2 { font-size:19px; letter-spacing:-.4px; margin:0; }
+  h3 { font-size:15px; margin:0; }
+  p { margin:0; }
+  .muted { color:var(--muted); }
+  .intro { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; margin:8px 0 24px; }
+  .intro p { color:var(--muted); max-width:580px; }
+  .primary,.secondary,.danger,.small-btn { border:0; border-radius:12px; padding:12px 16px; font-weight:750; transition:transform .12s,opacity .12s; }
+  .primary { background:var(--green); color:white; }
+  .secondary { background:#edf1ed; color:var(--ink); }
+  .danger { background:var(--redbg); color:var(--red); }
+  .small-btn { padding:8px 11px; background:#edf1ed; color:var(--ink); font-size:13px; }
+  button:active { transform:scale(.98); }
+  .grid { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:16px; }
+  .card { background:var(--panel); border:1px solid rgba(225,231,225,.9); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); min-width:0; }
+  .span-3 { grid-column:span 3; } .span-4 { grid-column:span 4; } .span-5 { grid-column:span 5; } .span-7 { grid-column:span 7; } .span-8 { grid-column:span 8; } .span-12 { grid-column:span 12; }
+  .stat-top { display:flex; justify-content:space-between; gap:8px; align-items:center; color:var(--muted); font-size:13px; }
+  .stat-value { font-size:31px; font-weight:850; letter-spacing:-1.2px; margin:12px 0 4px; }
+  .stat-foot { color:var(--muted); font-size:12px; }
+  .stat-icon { width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:var(--green2);color:var(--green);font-size:18px; }
+  .section-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:17px; }
+  .progress-row { margin:16px 0 0; }
+  .progress-label { display:flex; justify-content:space-between; gap:12px; font-size:13px; margin-bottom:8px; }
+  .progress-label strong { font-weight:750; }
+  .bar { height:8px; background:#edf1ed; border-radius:99px; overflow:hidden; }
+  .bar > span { display:block; height:100%; background:var(--green); border-radius:99px; transition:width .2s; }
+  .bar.lime > span { background:#9acb38; }
+  .pill { display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:#edf1ed;font-size:11px;font-weight:800;color:#46534a; }
+  .pill.good { background:var(--green2); color:var(--green); }
+  .workout-list { display:flex; flex-direction:column; gap:0; }
+  .workout-item { display:flex; align-items:center; gap:12px; padding:14px 0; border-bottom:1px solid var(--line); }
+  .workout-item:last-child { border-bottom:0; padding-bottom:0; }
+  .workout-icon { width:42px;height:42px;flex:0 0 42px;border-radius:14px;background:#f0f4ed;display:grid;place-items:center;font-size:20px; }
+  .workout-info { flex:1; min-width:0; }
+  .workout-info strong { display:block; font-size:14px; }
+  .workout-info small { color:var(--muted); font-size:12px; display:block; margin-top:3px; }
+  .workout-meta { text-align:right; font-size:13px; font-weight:800; white-space:nowrap; }
+  .workout-meta small { display:block; color:var(--muted); font-weight:500; margin-top:3px; }
+  .empty { text-align:center; padding:28px 10px; color:var(--muted); }
+  .empty .emoji { font-size:30px; margin-bottom:8px; }
+  .empty p { font-size:13px; margin:4px auto 14px; max-width:280px; }
+  .report-preview { background:#f5f8f3;border:1px solid #e4ebe0;border-radius:15px;padding:16px;margin-top:12px; }
+  .report-preview pre { white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#39453d;margin:0; }
+  .form-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px; }
+  .field { display:flex;flex-direction:column;gap:6px;min-width:0; }
+  .field.full { grid-column:1/-1; }
+  label { font-size:12px;font-weight:800;color:#4e5b52; }
+  input,select,textarea { width:100%;border:1px solid #dce4dc;background:#fbfcfa;color:var(--ink);padding:12px 13px;border-radius:11px;outline:none;min-height:45px; }
+  textarea { min-height:80px;resize:vertical; }
+  input:focus,select:focus,textarea:focus { border-color:#5c9c7e;box-shadow:0 0 0 3px rgba(23,107,77,.1); }
+  .form-actions { display:flex;gap:9px;justify-content:flex-end;margin-top:17px;flex-wrap:wrap; }
+  .tabs { display:flex;gap:6px;background:#edf1ed;padding:5px;border-radius:13px; }
+  .tab { border:0;background:transparent;padding:8px 12px;border-radius:9px;font-size:13px;font-weight:750;color:var(--muted); }
+  .tab.active { background:white;color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.05); }
+  .settings-note { padding:12px 13px;background:#fff8e7;border:1px solid #f0e3be;border-radius:12px;font-size:12px;color:#665321;line-height:1.5; }
+  .toast { position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#18211c;color:white;padding:12px 17px;border-radius:12px;box-shadow:var(--shadow);font-size:13px;z-index:30;max-width:calc(100vw - 32px); }
+  .hidden { display:none !important; }
+  .nav { display:flex;gap:8px;flex-wrap:wrap;margin:0 0 20px; }
+  .nav button { border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:9px 14px;font-size:13px;font-weight:750; }
+  .nav button.active { background:var(--ink);color:white;border-color:var(--ink); }
+  .subheading { font-size:13px;font-weight:800;color:#4e5b52;margin:17px 0 10px; }
+  .footer { text-align:center;color:var(--muted);font-size:11px;padding:26px 0 0; }
+  @media(max-width:800px) {
+    .span-3 {grid-column:span 6}.span-4 {grid-column:span 6}.span-5,.span-7,.span-8 {grid-column:span 12}
+    .intro {align-items:flex-start;flex-direction:column}.intro .primary {width:100%}
+  }
+  @media(max-width:520px) {
+    .app {padding:15px 12px 90px}.card {padding:16px;border-radius:17px}.grid {gap:11px}.span-3 {grid-column:span 6}.span-4 {grid-column:span 12}
+    .stat-value {font-size:26px}.header-right .today-label {display:none}.form-grid {grid-template-columns:1fr}.field.full {grid-column:auto}
+    .section-head {align-items:flex-start;flex-wrap:wrap}.workout-meta {font-size:12px}.brand {font-size:19px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><div class="brand-mark">↗</div><span>RepLog</span></div>
+    <div class="header-right"><span class="today-label" id="todayLabel"></span><div class="avatar">R</div></div>
+  </header>
+
+  <section class="intro">
+    <div>
+      <div class="eyebrow">Your training, in focus</div>
+      <h1>Small steps.<br>Stronger habits.</h1>
+      <p>Log your strength sessions, keep your goals visible, and turn your training into a clear weekly and monthly snapshot.</p>
+    </div>
+    <button class="primary" id="quickAddBtn">＋ Log a workout</button>
+  </section>
+
+  <nav class="nav" aria-label="Main navigation">
+    <button class="active" data-view="dashboard">Overview</button>
+    <button data-view="workouts">Workouts</button>
+    <button data-view="goals">Goals</button>
+    <button data-view="reports">Reports</button>
+    <button data-view="settings">Settings & data</button>
+  </nav>
+
+  <main>
+    <section id="view-dashboard">
+      <div class="grid">
+        <article class="card span-3">
+          <div class="stat-top"><span>Workouts this week</span><span class="stat-icon">▤</span></div>
+          <div class="stat-value" id="weekCount">0</div><div class="stat-foot" id="weekCountFoot">Goal not set</div>
+        </article>
+        <article class="card span-3">
+          <div class="stat-top"><span>Training time</span><span class="stat-icon">◷</span></div>
+          <div class="stat-value" id="weekMinutes">0 <small style="font-size:14px;letter-spacing:0">min</small></div><div class="stat-foot">This calendar week</div>
+        </article>
+        <article class="card span-3">
+          <div class="stat-top"><span>Sets logged</span><span class="stat-icon">▥</span></div>
+          <div class="stat-value" id="weekSets">0</div><div class="stat-foot">Across logged sessions</div>
+        </article>
+        <article class="card span-3">
+          <div class="stat-top"><span>Monthly sessions</span><span class="stat-icon">◫</span></div>
+          <div class="stat-value" id="monthCount">0</div><div class="stat-foot" id="monthCountFoot">Goal not set</div>
+        </article>
+
+        <article class="card span-5">
+          <div class="section-head"><h2>Goal progress</h2><button class="small-btn" data-goto="goals">Edit goals</button></div>
+          <div id="dashboardGoals"></div>
+        </article>
+        <article class="card span-7">
+          <div class="section-head"><h2>Recent workouts</h2><button class="small-btn" data-goto="workouts">View all</button></div>
+          <div id="recentWorkouts" class="workout-list"></div>
+        </article>
+        <article class="card span-7">
+          <div class="section-head"><h2>Weekly snapshot</h2><span class="pill" id="weekRange"></span></div>
+          <div id="weeklySnapshot"></div>
+        </article>
+        <article class="card span-5">
+          <div class="section-head"><h2>Quick report</h2><span class="pill good">Ready to draft</span></div>
+          <p class="muted" style="font-size:13px">Create a concise summary for a period and open it in your email app.</p>
+          <div class="subheading">Report period</div>
+          <div class="tabs" style="width:max-content">
+            <button class="tab active" data-report-period="week">Weekly</button>
+            <button class="tab" data-report-period="month">Monthly</button>
+          </div>
+          <div class="report-preview"><pre id="quickReportPreview"></pre></div>
+          <div class="form-actions"><button class="secondary" id="copyReportBtn">Copy report</button><button class="primary" id="emailReportBtn">Open email draft ↗</button></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="view-workouts" class="hidden">
+      <div class="grid">
+        <article class="card span-5">
+          <div class="section-head"><h2 id="workoutFormTitle">Log a workout</h2><span class="pill">Strength</span></div>
+          <form id="workoutForm">
+            <input type="hidden" id="editWorkoutId">
+            <div class="form-grid">
+              <div class="field"><label for="workoutDate">Date</label><input id="workoutDate" type="date" required></div>
+              <div class="field"><label for="workoutName">Workout name</label><input id="workoutName" placeholder="e.g. Upper body" required maxlength="70"></div>
+              <div class="field"><label for="workoutDuration">Duration (minutes)</label><input id="workoutDuration" type="number" min="1" max="1000" placeholder="60" required></div>
+              <div class="field"><label for="workoutExercises">Exercises</label><input id="workoutExercises" type="number" min="0" max="100" placeholder="6" value="0"></div>
+              <div class="field"><label for="workoutSets">Total sets</label><input id="workoutSets" type="number" min="0" max="1000" placeholder="18" value="0"></div>
+              <div class="field"><label for="workoutReps">Total reps (optional)</label><input id="workoutReps" type="number" min="0" max="10000" placeholder="150"></div>
+              <div class="field"><label for="workoutVolume">Volume (optional, kg)</label><input id="workoutVolume" type="number" min="0" step="0.5" placeholder="e.g. 4250"></div>
+              <div class="field"><label for="workoutEffort">Effort</label><select id="workoutEffort"><option value="">Not recorded</option><option>Easy</option><option>Moderate</option><option>Hard</option><option>Very hard</option></select></div>
+              <div class="field full"><label for="workoutNotes">Notes (optional)</label><textarea id="workoutNotes" placeholder="Exercises, progress, how you felt…"></textarea></div>
+            </div>
+            <div class="form-actions"><button type="button" class="secondary hidden" id="cancelEditBtn">Cancel edit</button><button class="primary" type="submit">Save workout</button></div>
+          </form>
+        </article>
+        <article class="card span-7">
+          <div class="section-head"><h2>Workout history</h2><span class="pill" id="historyCount">0 sessions</span></div>
+          <div class="form-grid" style="margin-bottom:14px">
+            <div class="field"><label for="historyFilter">Filter period</label><select id="historyFilter"><option value="all">All time</option><option value="week">This week</option><option value="month">This month</option></select></div>
+            <div class="field"><label for="historySearch">Search workouts</label><input id="historySearch" placeholder="Search name or notes"></div>
+          </div>
+          <div id="workoutHistory" class="workout-list"></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="view-goals" class="hidden">
+      <div class="grid">
+        <article class="card span-7">
+          <div class="section-head"><h2>Your targets</h2><span class="pill">Editable</span></div>
+          <p class="muted" style="font-size:13px">Set realistic targets. Progress is calculated from the workouts you log here.</p>
+          <form id="goalsForm" style="margin-top:18px">
+            <div class="form-grid">
+              <div class="field"><label for="weeklyWorkoutGoal">Workouts per week</label><input id="weeklyWorkoutGoal" type="number" min="1" max="21" required></div>
+              <div class="field"><label for="monthlyWorkoutGoal">Workouts per month</label><input id="monthlyWorkoutGoal" type="number" min="1" max="100" required></div>
+              <div class="field"><label for="weeklyMinutesGoal">Training minutes per week</label><input id="weeklyMinutesGoal" type="number" min="0" max="10000" required></div>
+              <div class="field"><label for="weeklySetsGoal">Sets per week</label><input id="weeklySetsGoal" type="number" min="0" max="10000" required></div>
+            </div>
+            <div class="form-actions"><button class="primary" type="submit">Save goals</button></div>
+          </form>
+        </article>
+        <article class="card span-5">
+          <div class="section-head"><h2>How progress is measured</h2></div>
+          <div class="workout-list">
+            <div class="workout-item"><div class="workout-icon">✓</div><div class="workout-info"><strong>Workout count</strong><small>Each saved session counts as one workout.</small></div></div>
+            <div class="workout-item"><div class="workout-icon">◷</div><div class="workout-info"><strong>Training time</strong><small>Sum of the duration entered for each session.</small></div></div>
+            <div class="workout-item"><div class="workout-icon">▥</div><div class="workout-info"><strong>Total sets</strong><small>Sum of the sets entered in each session.</small></div></div>
+          </div>
+          <p class="muted" style="font-size:12px;margin-top:16px">Weekly periods run Monday–Sunday. Monthly periods follow the calendar month.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="view-reports" class="hidden">
+      <div class="grid">
+        <article class="card span-5">
+          <div class="section-head"><h2>Report builder</h2><span class="pill good">Email-ready</span></div>
+          <div class="field"><label for="reportType">Report period</label><select id="reportType"><option value="week">Weekly summary</option><option value="month">Monthly summary</option></select></div>
+          <div class="field" style="margin-top:13px"><label for="reportEmail">Recipient email (optional)</label><input id="reportEmail" type="email" placeholder="you@example.com"></div>
+          <div class="form-actions" style="justify-content:flex-start"><button class="primary" id="generateReportBtn">Generate report</button><button class="secondary" id="copyLongReportBtn">Copy text</button></div>
+          <div class="settings-note" style="margin-top:15px">This creates a report from data stored in this browser. Opening an email draft does not send it automatically; review and send it in your email app.</div>
+          <div class="form-actions" style="justify-content:flex-start"><button class="secondary" id="emailLongReportBtn">Open email draft ↗</button></div>
+        </article>
+        <article class="card span-7">
+          <div class="section-head"><h2>Report preview</h2><span class="pill" id="reportLabel">Weekly</span></div>
+          <div class="report-preview" style="min-height:280px"><pre id="longReportPreview"></pre></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="view-settings" class="hidden">
+      <div class="grid">
+        <article class="card span-7">
+          <div class="section-head"><h2>Local data & backup</h2><span class="pill">On this device</span></div>
+          <p class="muted" style="font-size:13px">Your workouts and goals are saved in this browser using localStorage. They are not uploaded to GitHub or synced automatically to another device.</p>
+          <div class="form-actions" style="justify-content:flex-start;margin-top:18px">
+            <button class="primary" id="exportBtn">Export backup (JSON)</button>
+            <button class="secondary" id="exportCsvBtn">Export workouts (CSV)</button>
+            <label class="secondary" for="importFile" style="display:inline-flex;align-items:center;cursor:pointer">Import backup</label>
+            <input id="importFile" type="file" accept=".json,application/json" class="hidden">
+          </div>
+          <div class="settings-note" style="margin-top:18px">Keep a backup if you clear Safari website data, switch browsers, or change devices. Importing a backup replaces the data currently stored in this app.</div>
+          <div class="subheading">Clear all app data</div>
+          <p class="muted" style="font-size:12px;margin-bottom:12px">This permanently removes saved workouts and goals from this browser. Export a backup first if you may need it later.</p>
+          <button class="danger" id="clearDataBtn">Clear all data</button>
+        </article>
+        <article class="card span-5">
+          <div class="section-head"><h2>Scheduled email reports</h2><span class="pill">Setup needed</span></div>
+          <p class="muted" style="font-size:13px">The app can prepare weekly and monthly summaries, but a local HTML page cannot reliably run in the background or send email by itself.</p>
+          <div class="subheading">To automate sending later</div>
+          <div class="workout-list">
+            <div class="workout-item"><div class="workout-icon">1</div><div class="workout-info"><strong>Choose a scheduler</strong><small>For example, a scheduled workflow or automation service.</small></div></div>
+            <div class="workout-item"><div class="workout-icon">2</div><div class="workout-info"><strong>Provide data securely</strong><small>Local-only data is not available to a cloud scheduler unless you deliberately export or sync it.</small></div></div>
+            <div class="workout-item"><div class="workout-icon">3</div><div class="workout-info"><strong>Connect email delivery</strong><small>Use an email provider or service with credentials stored securely outside the HTML file.</small></div></div>
+          </div>
+          <div class="settings-note" style="margin-top:16px">Never put email passwords, private API keys, or service credentials in a public HTML file or GitHub repository.</div>
+        </article>
+      </div>
+    </section>
+  </main>
+  <div class="footer">RepLog · A private, local-first workout tracker · Your data stays in this browser</div>
+</div>
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  "use strict";
+  const STORAGE_KEY = "replog-fitness-v1";
+  const defaults = {
+    goals: { weeklyWorkouts: 4, monthlyWorkouts: 16, weeklyMinutes: 240, weeklySets: 60 },
+    workouts: [],
+    reportEmail: ""
+  };
+  let state = loadState();
+  let currentView = "dashboard";
+  let reportPeriod = "week";
+  let currentReport = "";
+
+  function loadState() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+      if (saved && typeof saved === "object") return {
+        goals: { ...defaults.goals, ...(saved.goals || {}) },
+        workouts: Array.isArray(saved.workouts) ? saved.workouts : [],
+        reportEmail: typeof saved.reportEmail === "string" ? saved.reportEmail : ""
+      };
+    } catch (e) { console.warn("Could not load saved data", e); }
+    return structuredCloneSafe(defaults);
+  }
+  function structuredCloneSafe(obj) { return JSON.parse(JSON.stringify(obj)); }
+  function saveState() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch (e) { toast("Could not save data. Check browser storage settings."); }
+  }
+  function uid() { return "w_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+  function dateLocal(d = new Date()) {
+    const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,"0"), day = String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${day}`;
+  }
+  function parseDate(s) { const [y,m,d] = s.split("-").map(Number); return new Date(y,m-1,d,12,0,0); }
+  function weekStart(d = new Date()) { const x = new Date(d); x.setHours(12,0,0,0); x.setDate(x.getDate() - ((x.getDay()+6)%7)); return x; }
+  function weekEnd(d = new Date()) { const x = weekStart(d); x.setDate(x.getDate()+6); return x; }
+  function inRange(dateStr, start, end) { const d = parseDate(dateStr); return d >= start && d <= end; }
+  function weekWorkouts() { const s=weekStart(),e=weekEnd(); return state.workouts.filter(w=>inRange(w.date,s,e)); }
+  function monthWorkouts(date = new Date()) { const s=new Date(date.getFullYear(),date.getMonth(),1,12), e=new Date(date.getFullYear(),date.getMonth()+1,0,12); return state.workouts.filter(w=>inRange(w.date,s,e)); }
+  function sum(arr,key) { return arr.reduce((a,x)=>a+(Number(x[key])||0),0); }
+  function fmtDate(s, options={day:"numeric",month:"short"}) { if(!s) return ""; return parseDate(s).toLocaleDateString(undefined,options); }
+  function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
+  function toast(message) {
+    const el=document.getElementById("toast"); el.textContent=message; el.classList.remove("hidden");
+    clearTimeout(toast.timer); toast.timer=setTimeout(()=>el.classList.add("hidden"),2600);
+  }
+  function percent(value,target) { return target>0 ? Math.min(100,Math.round(value/target*100)) : 0; }
+  function goalBar(label,value,target,unit="") {
+    const pct=percent(value,target);
+    return `<div class="progress-row"><div class="progress-label"><strong>${esc(label)}</strong><span>${value}${unit} / ${target}${unit}</span></div><div class="bar"><span style="width:${pct}%"></span></div><div class="stat-foot" style="margin-top:6px">${pct}% of target</div></div>`;
+  }
+  function renderWorkout(w, showActions=true) {
+    const details = `${fmtDate(w.date,{day:"numeric",month:"short",year:"numeric"})} · ${w.duration} min${w.sets ? " · "+w.sets+" sets" : ""}${w.exercises ? " · "+w.exercises+" exercises" : ""}`;
+    const note = w.notes ? ` · ${w.notes}` : "";
+    return `<div class="workout-item"><div class="workout-icon">🏋️</div><div class="workout-info"><strong>${esc(w.name)}</strong><small>${esc(details)}${note ? " — "+esc(w.notes) : ""}</small></div><div class="workout-meta">${w.volume ? esc(Number(w.volume).toLocaleString())+" kg" : (w.effort ? esc(w.effort) : "Strength")}<small>${showActions ? `<button class="small-btn" data-edit="${esc(w.id)}">Edit</button> <button class="small-btn" data-delete="${esc(w.id)}" aria-label="Delete ${esc(w.name)}">Delete</button>` : ""}</small></div></div>`;
+  }
+  function renderDashboard() {
+    const week=weekWorkouts(), month=monthWorkouts();
+    document.getElementById("weekCount").textContent=week.length;
+    document.getElementById("weekCountFoot").textContent=`${Math.max(0,state.goals.weeklyWorkouts-week.length)} to weekly goal`;
+    document.getElementById("weekMinutes").innerHTML=`${sum(week,"duration")} <small style="font-size:14px;letter-spacing:0">min</small>`;
+    document.getElementById("weekSets").textContent=sum(week,"sets").toLocaleString();
+    document.getElementById("monthCount").textContent=month.length;
+    document.getElementById("monthCountFoot").textContent=`${Math.max(0,state.goals.monthlyWorkouts-month.length)} to monthly goal`;
+    const gs=document.getElementById("dashboardGoals");
+    gs.innerHTML=goalBar("Workouts this week",week.length,state.goals.weeklyWorkouts)+
+      goalBar("Training time",sum(week,"duration"),state.goals.weeklyMinutes," min")+
+      goalBar("Total sets",sum(week,"sets"),state.goals.weeklySets);
+    const recent=[...state.workouts].sort((a,b)=>b.date.localeCompare(a.date)||b.createdAt-a.createdAt).slice(0,4);
+    document.getElementById("recentWorkouts").innerHTML=recent.length?recent.map(w=>renderWorkout(w,false)).join(""):`<div class="empty"><div class="emoji">🏋️</div><strong>No workouts yet</strong><p>Log your first session to start seeing your progress.</p><button class="primary" data-goto="workouts">Log first workout</button></div>`;
+    const start=weekStart(),end=weekEnd();
+    document.getElementById("weekRange").textContent=`${fmtDate(dateLocal(start))} – ${fmtDate(dateLocal(end))}`;
+    document.getElementById("weeklySnapshot").innerHTML=`
+      <div class="grid" style="gap:10px">
+        <div class="card span-4" style="box-shadow:none;background:#f7f9f6;padding:14px"><div class="stat-foot">Sessions</div><div class="stat-value" style="font-size:24px">${week.length}</div></div>
+        <div class="card span-4" style="box-shadow:none;background:#f7f9f6;padding:14px"><div class="stat-foot">Minutes</div><div class="stat-value" style="font-size:24px">${sum(week,"duration")}</div></div>
+        <div class="card span-4" style="box-shadow:none;background:#f7f9f6;padding:14px"><div class="stat-foot">Sets</div><div class="stat-value" style="font-size:24px">${sum(week,"sets")}</div></div>
+      </div>
+      <p class="muted" style="font-size:12px;margin-top:14px">${week.length ? `Most recent: ${esc([...week].sort((a,b)=>b.date.localeCompare(a.date))[0].name)}.` : "No sessions logged this week yet. Every session counts."}</p>`;
+    renderQuickReport();
+  }
+  function renderHistory() {
+    const filter=document.getElementById("historyFilter").value;
+    const search=document.getElementById("historySearch").value.trim().toLowerCase();
+    let list=[...state.workouts].sort((a,b)=>b.date.localeCompare(a.date)||b.createdAt-a.createdAt);
+    if(filter==="week") list=list.filter(w=>inRange(w.date,weekStart(),weekEnd()));
+    if(filter==="month") list=list.filter(w=>inRange(w.date,new Date(new Date().getFullYear(),new Date().getMonth(),1,12),new Date(new Date().getFullYear(),new Date().getMonth()+1,0,12)));
+    if(search) list=list.filter(w=>(w.name+" "+(w.notes||"")).toLowerCase().includes(search));
+    document.getElementById("historyCount").textContent=`${list.length} session${list.length===1?"":"s"}`;
+    document.getElementById("workoutHistory").innerHTML=list.length?list.map(w=>renderWorkout(w,true)).join(""):`<div class="empty"><div class="emoji">📓</div><strong>No matching workouts</strong><p>Try another filter or add a workout to your history.</p></div>`;
+  }
+  function renderGoals() {
+    document.getElementById("weeklyWorkoutGoal").value=state.goals.weeklyWorkouts;
+    document.getElementById("monthlyWorkoutGoal").value=state.goals.monthlyWorkouts;
+    document.getElementById("weeklyMinutesGoal").value=state.goals.weeklyMinutes;
+    document.getElementById("weeklySetsGoal").value=state.goals.weeklySets;
+  }
+  function buildReport(period) {
+    const isWeek=period==="week";
+    const now=new Date();
+    const start=isWeek?weekStart(now):new Date(now.getFullYear(),now.getMonth(),1,12);
+    const end=isWeek?weekEnd(now):new Date(now.getFullYear(),now.getMonth()+1,0,12);
+    const list=state.workouts.filter(w=>inRange(w.date,start,end));
+    const sessions=list.length, minutes=sum(list,"duration"), sets=sum(list,"sets"), reps=sum(list,"reps");
+    const sessionGoal=isWeek?state.goals.weeklyWorkouts:state.goals.monthlyWorkouts;
+    const minutesGoal=isWeek?state.goals.weeklyMinutes:0;
+    const setsGoal=isWeek?state.goals.weeklySets:0;
+    const range=`${fmtDate(dateLocal(start),{day:"numeric",month:"short"})} – ${fmtDate(dateLocal(end),{day:"numeric",month:"short",year:"numeric"})}`;
+    const lines=[
+      `REPLOG — ${isWeek?"WEEKLY":"MONTHLY"} FITNESS SUMMARY`,
+      range,
+      "",
+      `Workouts completed: ${sessions} / ${sessionGoal} (${percent(sessions,sessionGoal)}%)`,
+      `Training time: ${minutes} minutes${isWeek&&minutesGoal?` / ${minutesGoal} (${percent(minutes,minutesGoal)}%)`:""}`,
+      `Total sets: ${sets}${isWeek&&setsGoal?` / ${setsGoal} (${percent(sets,setsGoal)}%)`:""}`,
+      `Total reps logged: ${reps}`,
+      `Total lifting volume logged: ${sum(list,"volume").toLocaleString()} kg`,
+      "",
+      "GOAL CHECK",
+      `Workout target: ${sessions>=sessionGoal?"Achieved":"In progress"} (${sessions}/${sessionGoal})`,
+      ...(isWeek?[`Training-time target: ${minutes>=minutesGoal?"Achieved":"In progress"} (${minutes}/${minutesGoal} min)`,`Set target: ${sets>=setsGoal?"Achieved":"In progress"} (${sets}/${setsGoal})`]:[]),
+      "",
+      "WORKOUTS",
+      ...(list.length?list.sort((a,b)=>a.date.localeCompare(b.date)).map(w=>`• ${fmtDate(w.date,{day:"numeric",month:"short"})} — ${w.name}: ${w.duration} min, ${w.sets} sets${w.exercises?`, ${w.exercises} exercises`:""}${w.volume?`, ${Number(w.volume).toLocaleString()} kg volume`:""}`):["No workouts logged for this period."]),
+      "",
+      "Generated by RepLog. Figures are based on workouts entered in this app."
+    ];
+    return lines.join("\n");
+  }
+  function renderQuickReport() {
+    currentReport=buildReport(reportPeriod);
+    document.getElementById("quickReportPreview").textContent=currentReport;
+  }
+  function renderLongReport() {
+    const period=document.getElementById("reportType").value;
+    currentReport=buildReport(period);
+    document.getElementById("longReportPreview").textContent=currentReport;
+    document.getElementById("reportLabel").textContent=period==="week"?"Weekly":"Monthly";
+  }
+  function refresh() { renderDashboard(); renderHistory(); renderGoals(); renderLongReport(); }
+  function showView(view) {
+    currentView=view;
+    document.querySelectorAll("[id^='view-']").forEach(el=>el.classList.toggle("hidden",el.id!=="view-"+view));
+    document.querySelectorAll(".nav button[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
+    if(view==="dashboard") renderDashboard();
+    if(view==="workouts") renderHistory();
+    if(view==="goals") renderGoals();
+    if(view==="reports") renderLongReport();
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+  function resetWorkoutForm() {
+    document.getElementById("workoutForm").reset();
+    document.getElementById("editWorkoutId").value="";
+    document.getElementById("workoutDate").value=dateLocal();
+    document.getElementById("workoutExercises").value="0";
+    document.getElementById("workoutSets").value="0";
+    document.getElementById("workoutFormTitle").textContent="Log a workout";
+    document.getElementById("cancelEditBtn").classList.add("hidden");
+  }
+  function editWorkout(id) {
+    const w=state.workouts.find(x=>x.id===id); if(!w) return;
+    showView("workouts");
+    document.getElementById("editWorkoutId").value=w.id;
+    document.getElementById("workoutDate").value=w.date;
+    document.getElementById("workoutName").value=w.name;
+    document.getElementById("workoutDuration").value=w.duration;
+    document.getElementById("workoutExercises").value=w.exercises||0;
+    document.getElementById("workoutSets").value=w.sets||0;
+    document.getElementById("workoutReps").value=w.reps||"";
+    document.getElementById("workoutVolume").value=w.volume||"";
+    document.getElementById("workoutEffort").value=w.effort||"";
+    document.getElementById("workoutNotes").value=w.notes||"";
+    document.getElementById("workoutFormTitle").textContent="Edit workout";
+    document.getElementById("cancelEditBtn").classList.remove("hidden");
+    document.getElementById("workoutForm").scrollIntoView({behavior:"smooth",block:"start"});
+  }
+  function download(filename,content,type) {
+    const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob);
+    const a=document.createElement("a"); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  function csvEscape(v) { const s=String(v??""); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
+  function emailDraft(period) {
+    const body=buildReport(period);
+    const recipient=document.getElementById("reportEmail").value.trim()||state.reportEmail||"";
+    state.reportEmail=recipient; saveState();
+    const subject=encodeURIComponent(`RepLog ${period==="week"?"Weekly":"Monthly"} Fitness Summary`);
+    const bodyEncoded=encodeURIComponent(body);
+    const url=`mailto:${encodeURIComponent(recipient)}?subject=${subject}&body=${bodyEncoded}`;
+    if(url.length>1800) {
+      copyText(body);
+      toast("Report copied. The email draft may be too long for mailto; paste the copied text into an email.");
+      return;
+    }
+    window.location.href=url;
+  }
+  async function copyText(text) {
+    try {
+      if(navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); toast("Report copied to clipboard."); }
+      else {
+        const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();
+        const ok=document.execCommand("copy");ta.remove(); toast(ok?"Report copied to clipboard.":"Copy unavailable. Select and copy the report text.");
+      }
+    } catch(e) { toast("Copy unavailable. Select and copy the report text."); }
+  }
+
+  document.getElementById("todayLabel").textContent=new Date().toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"});
+  document.getElementById("workoutDate").value=dateLocal();
+  document.getElementById("reportEmail").value=state.reportEmail||"";
+  document.querySelectorAll(".nav button[data-view]").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.view)));
+  document.addEventListener("click",e=>{
+    const go=e.target.closest("[data-goto]"); if(go) showView(go.dataset.goto);
+    const edit=e.target.closest("[data-edit]"); if(edit) editWorkout(edit.dataset.edit);
+    const del=e.target.closest("[data-delete]");
+    if(del) {
+      const w=state.workouts.find(x=>x.id===del.dataset.delete);
+      if(w && confirm(`Delete "${w.name}"? This cannot be undone.`)) {
+        state.workouts=state.workouts.filter(x=>x.id!==w.id); saveState(); refresh(); toast("Workout deleted.");
+      }
+    }
+  });
+  document.getElementById("quickAddBtn").addEventListener("click",()=>{ resetWorkoutForm(); showView("workouts"); document.getElementById("workoutName").focus(); });
+  document.getElementById("cancelEditBtn").addEventListener("click",resetWorkoutForm);
+  document.getElementById("workoutForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    const id=document.getElementById("editWorkoutId").value;
+    const existing=state.workouts.find(w=>w.id===id);
+    const workout={
+      id:id||uid(), createdAt:existing?.createdAt||Date.now(),
+      date:document.getElementById("workoutDate").value,
+      name:document.getElementById("workoutName").value.trim(),
+      duration:Number(document.getElementById("workoutDuration").value),
+      exercises:Number(document.getElementById("workoutExercises").value)||0,
+      sets:Number(document.getElementById("workoutSets").value)||0,
+      reps:Number(document.getElementById("workoutReps").value)||0,
+      volume:Number(document.getElementById("workoutVolume").value)||0,
+      effort:document.getElementById("workoutEffort").value,
+      notes:document.getElementById("workoutNotes").value.trim()
+    };
+    if(!workout.date||!workout.name||workout.duration<1) { toast("Add a date, workout name, and duration."); return; }
+    if(existing) state.workouts=state.workouts.map(w=>w.id===id?workout:w); else state.workouts.push(workout);
+    saveState(); resetWorkoutForm(); refresh(); toast(existing?"Workout updated.":"Workout saved.");
+  });
+  document.getElementById("historyFilter").addEventListener("change",renderHistory);
+  document.getElementById("historySearch").addEventListener("input",renderHistory);
+  document.getElementById("goalsForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    state.goals={
+      weeklyWorkouts:Number(document.getElementById("weeklyWorkoutGoal").value),
+      monthlyWorkouts:Number(document.getElementById("monthlyWorkoutGoal").value),
+      weeklyMinutes:Number(document.getElementById("weeklyMinutesGoal").value),
+      weeklySets:Number(document.getElementById("weeklySetsGoal").value)
+    };
+    saveState(); refresh(); toast("Goals saved.");
+  });
+  document.querySelectorAll("[data-report-period]").forEach(b=>b.addEventListener("click",()=>{
+    reportPeriod=b.dataset.reportPeriod;
+    document.querySelectorAll("[data-report-period]").forEach(x=>x.classList.toggle("active",x===b));
+    renderQuickReport();
+  }));
+  document.getElementById("copyReportBtn").addEventListener("click",()=>copyText(buildReport(reportPeriod)));
+  document.getElementById("emailReportBtn").addEventListener("click",()=>emailDraft(reportPeriod));
+  document.getElementById("generateReportBtn").addEventListener("click",renderLongReport);
+  document.getElementById("reportType").addEventListener("change",renderLongReport);
+  document.getElementById("copyLongReportBtn").addEventListener("click",()=>copyText(buildReport(document.getElementById("reportType").value)));
+  document.getElementById("emailLongReportBtn").addEventListener("click",()=>emailDraft(document.getElementById("reportType").value));
+  document.getElementById("exportBtn").addEventListener("click",()=>download(`replog-backup-${dateLocal()}.json`,JSON.stringify(state,null,2),"application/json"));
+  document.getElementById("exportCsvBtn").addEventListener("click",()=>{
+    const fields=["date","name","duration","exercises","sets","reps","volume","effort","notes"];
+    const rows=[fields.join(","),...state.workouts.map(w=>fields.map(k=>csvEscape(w[k])).join(","))];
+    download(`replog-workouts-${dateLocal()}.csv`,"\uFEFF"+rows.join("\r\n"),"text/csv;charset=utf-8");
+  });
+  document.getElementById("importFile").addEventListener("change",async e=>{
+    const file=e.target.files?.[0]; if(!file) return;
+    try {
+      const imported=JSON.parse(await file.text());
+      if(!imported || !Array.isArray(imported.workouts) || typeof imported.goals!=="object") throw new Error("Invalid backup");
+      if(!confirm("Importing will replace the workouts and goals currently stored in this browser. Continue?")) { e.target.value="";return; }
+      state={goals:{...defaults.goals,...imported.goals},workouts:imported.workouts,reportEmail:imported.reportEmail||""};
+      saveState(); document.getElementById("reportEmail").value=state.reportEmail; refresh(); toast("Backup imported.");
+    } catch(err) { alert("This file doesn't look like a RepLog backup."); }
+    e.target.value="";
+  });
+  document.getElementById("clearDataBtn").addEventListener("click",()=>{
+    if(confirm("Delete all workouts and reset goals? This cannot be undone unless you exported a backup.")) {
+      state=structuredCloneSafe(defaults); saveState(); document.getElementById("reportEmail").value=""; refresh(); toast("App data cleared.");
+    }
+  });
+  document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.goto)));
+  refresh();
+})();
+</script>
+</body>
+</html>
